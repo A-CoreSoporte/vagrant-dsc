@@ -138,17 +138,17 @@ module VagrantPlugins
 
       def get_guest_powershell_version
         version = @machine.communicate.shell.powershell("$PSVersionTable.PSVersion.Major")
-        return version[:data][0][:stdout]
+        return version.stdout
       end
 
       def get_lcm_state
         state = @machine.communicate.shell.powershell("(Get-DscLocalConfigurationManager).LCMState")
-        return state[:data][0][:stdout]
+        return state.stdout
       end
 
       def get_configuration_status
         status = @machine.communicate.shell.powershell("(Get-DscConfigurationStatus).Status")
-        return status[:data][0][:stdout]
+        return status.stdout
       end
 
       def show_dsc_failure_message
@@ -257,7 +257,7 @@ module VagrantPlugins
 
         # A bit of an ugly dance, but this is how we get neat, colourised output and exit codes from a Powershell run
         error = false
-        machine.communicate.shell.powershell("powershell -ExecutionPolicy Bypass -OutputFormat Text -file #{DSC_GUEST_RUNNER_PATH}") do |type, data|
+        machine.communicate.shell.elevated("powershell -ExecutionPolicy Bypass -OutputFormat Text -file #{DSC_GUEST_RUNNER_PATH}") do |type, data|
           if !data.chomp.empty?
             error = true if type == :stderr
             if [:stderr, :stdout].include?(type)
